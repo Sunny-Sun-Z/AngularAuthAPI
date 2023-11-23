@@ -1,6 +1,7 @@
 ﻿using AngularAuthAPI.Context;
 using AngularAuthAPI.Helpers;
 using AngularAuthAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +23,7 @@ namespace AngularAuthAPI.Controllers
             _authContext = context;
         }
         [HttpPost("authentication")]
-        public async Task<IActionResult> Authenticate([FromBody] Models.User userObj)
+        public async Task<IActionResult> Authenticate([FromBody] UserLogin userObj)
         {
             if(userObj == null)
             {
@@ -41,7 +42,7 @@ namespace AngularAuthAPI.Controllers
             }
             //return Ok(new { Message = "Login Sucessfully!" });
             user.Token = CreateJwtToken(user);
-            return Ok(new { Token= user.Token, Message= "Login Sucessfully!" });
+            return Ok(new {User = user, Message = "Login Sucessfully!"} );
         }
         [HttpPost("register")]
         public async Task<IActionResult> RegisterUser([FromBody] User userObj)
@@ -104,13 +105,13 @@ namespace AngularAuthAPI.Controllers
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = identity,
-                Expires = DateTime.UtcNow.AddDays(1),
+                Expires = DateTime.UtcNow.AddSeconds(10), //DateTime.UtcNow.AddDays(1), //
                 SigningCredentials = credentials,
             };
             var token = jwtTokenHandler.CreateToken(tokenDescriptor);
             return jwtTokenHandler.WriteToken(token);
         }
-
+        [Authorize]
         [HttpGet("GetAllUsers")]
         public async Task<ActionResult<User>> GetAllUsers()
         {

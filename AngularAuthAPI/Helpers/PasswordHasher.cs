@@ -42,7 +42,7 @@ namespace AngularAuthAPI.Helpers
             for(var i=0; i<HasSize; i++)
             {
                 if (hashBytes[i + SaltSize] != hash[i])
-                    return false; //temp set to true, should be false, but the code not working... always return false.
+                    return false;
             }
             return true;
         }
