@@ -1,8 +1,12 @@
 using AngularAuthAPI.Context;
+using AngularAuthAPI.UtilityService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+//using NETCore.MailKit.Core;
+using NETCore.MailKit.Extensions;
+using NETCore.MailKit.Infrastructure.Internal;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +23,13 @@ builder.Services.AddDbContext<AppDbContext>(option =>
 {
     option.UseSqlServer(builder.Configuration.GetConnectionString("SqlServerConnStr"));
 });
+
+// this for forget password related services
+
+builder.Services.AddScoped<IEmailService, EmailService>();
+
+//builder.Services.AddScoped<NETCore.MailKit.IMailKitProvider, NETCore.MailKit.Core.MailKitProvider>();
+builder.Services.AddMailKit(config => config.UseMailKit(builder.Configuration.GetSection("EmailSettings").Get<MailKitOptions>()));
 
 // this will let model error still go to controllers other than directly response.
 builder.Services.Configure<ApiBehaviorOptions>(options =>
