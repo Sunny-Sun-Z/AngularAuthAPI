@@ -1,4 +1,5 @@
 ﻿using AngularAuthAPI.Context;
+using AngularAuthAPI.Exceptions;
 using AngularAuthAPI.Helpers;
 using AngularAuthAPI.Models;
 using AngularAuthAPI.Models.Dto;
@@ -23,11 +24,14 @@ namespace AngularAuthAPI.Controllers
         private readonly AppDbContext _authContext;
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
-        public UserController(AppDbContext context, IConfiguration config, IEmailService emailService)
+        private readonly ILogger _logger;
+        public UserController(AppDbContext context, IConfiguration config, IEmailService emailService, ILogger logger)
         {
             _authContext = context;
             _configuration = config;
             _emailService = emailService;
+            _logger = logger;
+
         }
         [HttpPost("authentication")]
         public async Task<IActionResult> Authenticate([FromBody] UserLogin userObj)
@@ -212,10 +216,10 @@ namespace AngularAuthAPI.Controllers
            // user.Token = newAccessToken;
             await _authContext.SaveChangesAsync();
             return Ok(new TokenApiDto()
-            {
-                AccessToken = newAccessToken,
-                RefreshToken = newRefreshToken
-            });
+               {
+                   AccessToken = newAccessToken,
+                   RefreshToken = newRefreshToken
+               });
         }
 
         [HttpPost("send-reset-email/{email}")]
@@ -281,6 +285,22 @@ namespace AngularAuthAPI.Controllers
                 StatusCode = 200,
                 Message = "Password Reset Successfully!"
             });
+        }
+
+        [HttpGet]
+        public Task<ActionResult<User>> GetUserById(int id)
+        {
+            try
+            {
+
+            }
+
+            catch (Exception ex)
+            {
+                var exception = new AppExceptionHandler(_logger);
+                return exception.
+
+            }
         }
     }
 }

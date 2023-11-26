@@ -1,4 +1,5 @@
 using AngularAuthAPI.Context;
+using AngularAuthAPI.Exceptions;
 using AngularAuthAPI.UtilityService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
@@ -66,8 +67,10 @@ builder.Services.AddAuthentication(x => {
     };
 });
 
+//builder.Services.AddExceptionHandler<AppExceptionHandler>();
 
 var app = builder.Build();
+//app.UseExceptionHandler();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
