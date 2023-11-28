@@ -23,14 +23,14 @@ namespace AngularAuthAPI.Controllers
     {
         private readonly AppDbContext _authContext;
         private readonly IConfiguration _configuration;
-        private readonly IEmailService _emailService;
-        private readonly ILogger _logger;
-        public UserController(AppDbContext context, IConfiguration config, IEmailService emailService, ILogger logger)
+     //   private readonly IEmailService _emailService;
+        private readonly ILogger<UserController> _logger;
+        public UserController(AppDbContext context, IConfiguration config,  ILogger<UserController> logger) //IEmailService emailService, temp comment out, gmail not working
         {
             _authContext = context;
             _configuration = config;
-            _emailService = emailService;
-            _logger = logger;
+          //  _emailService = emailService;
+           // _logger = logger;
 
         }
         [HttpPost("authentication")]
@@ -241,9 +241,12 @@ namespace AngularAuthAPI.Controllers
             user.RefreshTokennExpireTime = DateTime.Now.AddMinutes(15);
             string from = _configuration["EmailSettings:From"];
             var emailModel = new EmailModel(email, "Reset Password", EmailBody.EamilStringBody(email, emailToken));
-            _emailService.SendEmail(emailModel);
+           // _emailService.SendEmail(emailModel);
             _authContext.Entry(user).State = EntityState.Modified;
             await _authContext.SaveChangesAsync();
+
+            _logger.LogInformation("just first test");
+
             return Ok(new
             {
                 StatusCode = 200,
@@ -254,7 +257,8 @@ namespace AngularAuthAPI.Controllers
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassord(ResetPasswordDto resetPasswordDto)
         {
-            var newToken = resetPasswordDto.EmailToken.Replace(" ", "+");
+            var newToken = resetPasswordDto.EmailToken.Replace(" ", "+").Replace("\\","").Replace("\"", "");
+
             var user = await _authContext.Users.AsNoTracking().FirstOrDefaultAsync(u=>u.Email==resetPasswordDto.Email);
             if (user is null)
             {
@@ -265,8 +269,8 @@ namespace AngularAuthAPI.Controllers
                 });
             }
             var tokenCode = user.ResetPasswordToken;
-            DateTime emailTokenExpiry = user.ResetPasswordTokenExpireTime;
-            if(tokenCode != resetPasswordDto.EmailToken || emailTokenExpiry< DateTime.Now)
+            DateTime emailTokenExpiry = user.RefreshTokennExpireTime;
+            if(tokenCode != newToken || emailTokenExpiry< DateTime.Now)
             {
                 return BadRequest(
                     new
@@ -287,20 +291,20 @@ namespace AngularAuthAPI.Controllers
             });
         }
 
-        [HttpGet]
-        public Task<ActionResult<User>> GetUserById(int id)
-        {
-            try
-            {
+        //[HttpGet]
+        //public Task<ActionResult<User>> GetUserById(int id)
+        //{
+        //    try
+        //    {
 
-            }
+        //    }
 
-            catch (Exception ex)
-            {
-                var exception = new AppExceptionHandler(_logger);
-                return exception.
+        //    catch (Exception ex)
+        //    {
+        //        var exception = new AppExceptionHandler(_logger);
+        //        //return exception.
 
-            }
-        }
+        //    }
+        //}
     }
 }
